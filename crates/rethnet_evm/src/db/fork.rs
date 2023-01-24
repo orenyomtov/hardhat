@@ -60,7 +60,7 @@ impl ForkDatabase {
 }
 
 impl revm::Database for ForkDatabase {
-    type Error = ForkDatabaseError;
+    type Error = anyhow::Error;
 
     fn basic(&mut self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
         if let Some(layered) = self
@@ -96,7 +96,10 @@ impl revm::Database for ForkDatabase {
             Ok(cached.clone())
         } else {
             // remote_db doesn't support code_by_hash, so there's no delegation to it here.
-            Err(ForkDatabaseError::NoSuchCodeHash(code_hash))
+            Err(anyhow::anyhow!(
+                "Layered database does not contain contract with code hash: {}.",
+                code_hash,
+            ))
         }
     }
 
@@ -130,12 +133,13 @@ impl revm::DatabaseCommit for ForkDatabase {
 }
 
 impl crate::DatabaseDebug for ForkDatabase {
-    type Error = ForkDatabaseError;
+    type Error = anyhow::Error;
 
     fn account_storage_root(&mut self, address: &Address) -> Result<Option<B256>, Self::Error> {
         self.layered_db
             .account_storage_root(address)
             .map_err(ForkDatabaseError::LayeredDatabase)
+            .map_err(|e| anyhow::anyhow!(e))
     }
 
     /// Inserts an account with the specified address.
@@ -147,6 +151,7 @@ impl crate::DatabaseDebug for ForkDatabase {
         self.layered_db
             .insert_account(address, account_info)
             .map_err(ForkDatabaseError::LayeredDatabase)
+            .map_err(|e| anyhow::anyhow!(e))
     }
 
     /// Modifies the account at the specified address using the provided function.
@@ -188,12 +193,14 @@ impl crate::DatabaseDebug for ForkDatabase {
         self.layered_db
             .modify_account(address, modifier)
             .map_err(ForkDatabaseError::LayeredDatabase)
+            .map_err(|e| anyhow::anyhow!(e))
     }
 
     /// Removes and returns the account at the specified address, if it exists.
     fn remove_account(&mut self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
         crate::DatabaseDebug::remove_account(&mut self.layered_db, address)
             .map_err(ForkDatabaseError::LayeredDatabase)
+            .map_err(|e| anyhow::anyhow!(e))
     }
 
     /// Sets the storage slot at the specified address and index to the provided value.
@@ -206,6 +213,7 @@ impl crate::DatabaseDebug for ForkDatabase {
         self.layered_db
             .set_account_storage_slot(address, index, value)
             .map_err(ForkDatabaseError::LayeredDatabase)
+            .map_err(|e| anyhow::anyhow!(e))
     }
 
     /// Reverts the state to match the specified state root.
@@ -213,6 +221,7 @@ impl crate::DatabaseDebug for ForkDatabase {
         self.layered_db
             .set_state_root(state_root)
             .map_err(ForkDatabaseError::LayeredDatabase)
+            .map_err(|e| anyhow::anyhow!(e))
     }
 
     /// Retrieves the storage root of the database.
@@ -221,7 +230,8 @@ impl crate::DatabaseDebug for ForkDatabase {
             Ok(self
                 .layered_db
                 .state_root()
-                .map_err(ForkDatabaseError::LayeredDatabase)?)
+                .map_err(ForkDatabaseError::LayeredDatabase)
+                .map_err(|e| anyhow::anyhow!(e))?)
         } else if let Some(cached) = self.fork_block_state_root_cache {
             Ok(cached)
         } else {
@@ -240,6 +250,7 @@ impl crate::DatabaseDebug for ForkDatabase {
         self.layered_db
             .checkpoint()
             .map_err(ForkDatabaseError::LayeredDatabase)
+            .map_err(|e| anyhow::anyhow!(e))
     }
 
     /// Reverts to the previous checkpoint, created using [`checkpoint`].
@@ -247,6 +258,7 @@ impl crate::DatabaseDebug for ForkDatabase {
         self.layered_db
             .revert()
             .map_err(ForkDatabaseError::LayeredDatabase)
+            .map_err(|e| anyhow::anyhow!(e))
     }
 
     /// Makes a snapshot of the database that's retained until [`remove_snapshot`] is called. Returns the snapshot's identifier.
