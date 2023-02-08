@@ -3,7 +3,7 @@ import { Account, Address } from "@nomicfoundation/ethereumjs-util";
 import { TypedTransaction } from "@nomicfoundation/ethereumjs-tx";
 import { BlockBuilder, Blockchain, Rethnet } from "rethnet-evm";
 
-import { NodeConfig } from "../node-types";
+import { isForkedNodeConfig, NodeConfig } from "../node-types";
 import {
   ethereumjsHeaderDataToRethnet,
   ethereumjsTransactionToRethnet,
@@ -38,9 +38,12 @@ export class RethnetAdapter implements VMAdapter {
     const limitContractCodeSize =
       config.allowUnlimitedContractSize === true ? 2n ** 64n - 1n : undefined;
 
-    const state = RethnetStateManager.withGenesisAccounts(
-      config.genesisAccounts
-    );
+    let state: RethnetStateManager;
+    if (isForkedNodeConfig(config)) {
+      state = RethnetStateManager.withFork(config.forkConfig);
+    } else {
+      state = RethnetStateManager.withGenesisAccounts(config.genesisAccounts);
+    }
 
     const rethnet = new Rethnet(blockchain, state.asInner(), {
       chainId: BigInt(config.chainId),
