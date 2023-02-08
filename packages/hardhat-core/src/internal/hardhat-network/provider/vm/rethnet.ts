@@ -297,7 +297,8 @@ export class RethnetAdapter implements VMAdapter {
    * Start tracing the VM execution with the given callbacks.
    */
   public enableTracing(callbacks: TracingCallbacks): void {
-    throw new Error("not implemented");
+    console.log("RethnetAdapter.enableTracing not implemented");
+    // throw new Error("not implemented");
   }
 
   /**
