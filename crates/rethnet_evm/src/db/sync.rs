@@ -49,7 +49,7 @@ where
 {
     /// Constructs an [`AsyncDatabase`] instance with the provided database.
     pub fn new<D: SyncDatabase<E>>(mut db: D) -> io::Result<Self> {
-        let runtime = Builder::new_multi_thread().build()?;
+        let runtime = Builder::new_multi_thread().enable_all().build()?;
 
         let (sender, mut receiver) = unbounded_channel::<Request<E>>();
 
