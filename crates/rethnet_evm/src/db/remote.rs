@@ -52,13 +52,13 @@ impl RemoteDatabase {
 
     /// Retrieve the state root of the given block
     pub fn state_root(&self, block_number: u64) -> Result<B256, RemoteDatabaseError> {
-        Ok(self
-            .runtime()
-            .block_on(
+        Ok(tokio::task::block_in_place(move || {
+            self.runtime().block_on(
                 self.client
                     .get_block_by_number(BlockSpec::Number(block_number), false),
-            )?
-            .state_root)
+            )
+        })?
+        .state_root)
     }
 }
 
@@ -66,14 +66,14 @@ impl DatabaseRef for RemoteDatabase {
     type Error = RemoteDatabaseError;
 
     fn basic(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
-        Ok(Some(
+        Ok(Some(tokio::task::block_in_place(move || {
             self.runtime()
                 .block_on(
                     self.client
                         .get_account_info(&address, BlockSpec::Tag("latest".to_string())),
                 )
-                .map_err(RemoteDatabaseError::RpcError)?,
-        ))
+                .map_err(RemoteDatabaseError::RpcError)
+        })?))
     }
 
     /// unimplemented
@@ -82,13 +82,15 @@ impl DatabaseRef for RemoteDatabase {
     }
 
     fn storage(&self, address: Address, index: U256) -> Result<U256, Self::Error> {
-        self.runtime()
-            .block_on(self.client.get_storage_at(
-                &address,
-                index,
-                BlockSpec::Tag("latest".to_string()),
-            ))
-            .map_err(RemoteDatabaseError::RpcError)
+        tokio::task::block_in_place(move || {
+            self.runtime()
+                .block_on(self.client.get_storage_at(
+                    &address,
+                    index,
+                    BlockSpec::Tag("latest".to_string()),
+                ))
+                .map_err(RemoteDatabaseError::RpcError)
+        })
     }
 }
 
