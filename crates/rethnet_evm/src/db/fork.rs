@@ -4,9 +4,12 @@ use tokio::runtime::Builder;
 
 use rethnet_eth::{remote::RpcClient, Address, B256, U256};
 
-use crate::db::{
-    layered_db::{LayeredDatabase, RethnetLayer},
-    remote::{RemoteDatabase, RemoteDatabaseError},
+use crate::{
+    db::{
+        layered_db::{LayeredDatabase, RethnetLayer},
+        remote::{RemoteDatabase, RemoteDatabaseError},
+    },
+    DatabaseDebug,
 };
 
 /// A database integrating the state from a remote node and the state from a local layered
@@ -43,10 +46,17 @@ pub enum ForkDatabaseError {
 
 impl ForkDatabase {
     /// instantiate a new ForkDatabase
-    pub fn new(url: &str, fork_block_number: Option<u64>) -> Self {
+    pub fn new(
+        url: &str,
+        accounts: HashMap<Address, AccountInfo>,
+        fork_block_number: Option<u64>,
+    ) -> Self {
         let remote_db = RemoteDatabase::new(url);
 
-        let layered_db = LayeredDatabase::<RethnetLayer>::default();
+        let mut layered_db =
+            LayeredDatabase::with_layer(RethnetLayer::with_genesis_accounts(accounts));
+
+        layered_db.checkpoint().unwrap();
 
         Self {
             layered_db,
@@ -302,6 +312,7 @@ mod tests {
             .expect("failed to parse address");
         let mut fork_db = ForkDatabase::new(
             &get_alchemy_url().expect("failed to get alchemy url"),
+            HashMap::default(),
             Some(16220843),
         );
         let account_info =
