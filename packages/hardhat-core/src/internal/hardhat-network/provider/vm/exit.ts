@@ -7,6 +7,8 @@ export enum ExitCode {
   OUT_OF_GAS,
   INTERNAL_ERROR,
   INVALID_OPCODE,
+  STACK_UNDERFLOW,
+  CREATE_COLLISION,
   CODESIZE_EXCEEDS_MAXIMUM,
 }
 
@@ -16,6 +18,8 @@ const exitCodeToRethnetExitCode: Record<ExitCode, number> = {
   [ExitCode.OUT_OF_GAS]: 0x50,
   [ExitCode.INTERNAL_ERROR]: 0x20,
   [ExitCode.INVALID_OPCODE]: 0x53,
+  [ExitCode.STACK_UNDERFLOW]: 0x57,
+  [ExitCode.CREATE_COLLISION]: 0x61,
   [ExitCode.CODESIZE_EXCEEDS_MAXIMUM]: 0x65,
 };
 
@@ -34,6 +38,10 @@ export class Exit {
       case 0x51:
       case 0x53:
         return new Exit(ExitCode.INVALID_OPCODE);
+      case 0x57:
+        return new Exit(ExitCode.STACK_UNDERFLOW);
+      case 0x61:
+        return new Exit(ExitCode.CREATE_COLLISION);
       case 0x65:
         return new Exit(ExitCode.CODESIZE_EXCEEDS_MAXIMUM);
       default: {
@@ -65,6 +73,14 @@ export class Exit {
       return new Exit(ExitCode.INVALID_OPCODE);
     }
 
+    if (evmError.error === ERROR.STACK_UNDERFLOW) {
+      return new Exit(ExitCode.STACK_UNDERFLOW);
+    }
+
+    if (evmError.error === ERROR.CREATE_COLLISION) {
+      return new Exit(ExitCode.CREATE_COLLISION);
+    }
+
     if (evmError.error === ERROR.CODESIZE_EXCEEDS_MAXIMUM) {
       return new Exit(ExitCode.CODESIZE_EXCEEDS_MAXIMUM);
     }
@@ -92,6 +108,10 @@ export class Exit {
         return "Internal error";
       case ExitCode.INVALID_OPCODE:
         return "Invalid opcode";
+      case ExitCode.STACK_UNDERFLOW:
+        return "Stack underflow";
+      case ExitCode.CREATE_COLLISION:
+        return "Create collision";
       case ExitCode.CODESIZE_EXCEEDS_MAXIMUM:
         return "Codesize exceeds maximum";
     }
@@ -111,6 +131,10 @@ export class Exit {
         return new EvmError(ERROR.INTERNAL_ERROR);
       case ExitCode.INVALID_OPCODE:
         return new EvmError(ERROR.INVALID_OPCODE);
+      case ExitCode.STACK_UNDERFLOW:
+        return new EvmError(ERROR.STACK_UNDERFLOW);
+      case ExitCode.CREATE_COLLISION:
+        return new EvmError(ERROR.CREATE_COLLISION);
       case ExitCode.CODESIZE_EXCEEDS_MAXIMUM:
         return new EvmError(ERROR.CODESIZE_EXCEEDS_MAXIMUM);
     }
