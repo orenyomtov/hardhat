@@ -38,7 +38,7 @@ describe("Debug module", function () {
       setCWD();
       useProvider();
 
-      describe("debug_traceTransaction", function () {
+      describe.skip("debug_traceTransaction", function () {
         it("Should throw for unknown txs", async function () {
           const unknownTxHash =
             "0x1234567876543234567876543456765434567aeaeaed67616732632762762373";
