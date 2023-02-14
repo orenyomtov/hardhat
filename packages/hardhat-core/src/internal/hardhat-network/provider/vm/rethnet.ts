@@ -305,7 +305,8 @@ export class RethnetAdapter implements VMAdapter {
    * Stop tracing the execution.
    */
   public disableTracing(): void {
-    throw new Error("not implemented");
+    console.log("RethnetAdapter.disableTracing not implemented");
+    // throw new Error("not implemented");
   }
 
   public async makeSnapshot(): Promise<Buffer> {
