@@ -57,6 +57,10 @@ export class EthereumJSAdapter implements VMAdapter {
     private readonly _forkBlockNumber?: bigint
   ) {}
 
+  public getForkBlockNumber() {
+    return this._forkBlockNumber;
+  }
+
   public static async create(
     common: Common,
     blockchain: HardhatBlockchainInterface,

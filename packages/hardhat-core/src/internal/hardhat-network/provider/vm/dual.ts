@@ -10,7 +10,7 @@ import {
 
 import { assertHardhatInvariant } from "../../../core/errors";
 import { RpcDebugTracingConfig } from "../../../core/jsonrpc/types/input/debugTraceTransaction";
-import { NodeConfig } from "../node-types";
+import { isForkedNodeConfig, NodeConfig } from "../node-types";
 import { RpcDebugTraceOutput } from "../output";
 import { HardhatBlockchainInterface } from "../types/HardhatBlockchainInterface";
 
@@ -53,6 +53,24 @@ export class DualModeAdapter implements VMAdapter {
       config,
       selectHardfork
     );
+
+    // if the fork node config doesn't specify a fork block number, then the
+    // ethereum-js VM used the latest block number from the forked chain. here
+    // we get that number from that VM so it can be passed into the rethnet VM;
+    // otherwise, the rethnet VM's determination of "latest" might be a later
+    // number, resulting in a different fork block.
+    if (
+      isForkedNodeConfig(config) &&
+      config.forkConfig.blockNumber === undefined
+    ) {
+      const forkBlockNumber = ethereumJSAdapter.getForkBlockNumber();
+      if (forkBlockNumber !== undefined) {
+        config.forkConfig.blockNumber = parseInt(
+          forkBlockNumber.toString(10),
+          10
+        );
+      }
+    }
 
     const rethnetAdapter = await RethnetAdapter.create(
       config,
