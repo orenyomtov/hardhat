@@ -466,7 +466,9 @@ function assertEqualAccounts(
 
   if (!ethereumJSAccount.codeHash.equals(rethnetAccount.codeHash)) {
     console.trace(
-      `Different codeHash: ${ethereumJSAccount.codeHash} !== ${rethnetAccount.codeHash}`
+      `Different codeHash: ${ethereumJSAccount.codeHash.toString(
+        "hex"
+      )} !== ${rethnetAccount.codeHash.toString("hex")}`
     );
     differences.push("codeHash");
   }
