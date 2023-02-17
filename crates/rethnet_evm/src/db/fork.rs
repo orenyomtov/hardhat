@@ -54,8 +54,6 @@ impl ForkDatabase {
         accounts: HashMap<Address, AccountInfo>,
         fork_block_number: Option<u64>,
     ) -> Self {
-        let remote_db = RemoteDatabase::new(url);
-
         let rpc_client = RpcClient::new(url);
 
         let async_runtime = Builder::new_multi_thread()
@@ -70,6 +68,8 @@ impl ForkDatabase {
                 .expect("failed to get latest block")
                 .number)
             .unwrap();
+
+        let remote_db = RemoteDatabase::new(url, fork_block_number);
 
         let mut initialized_accounts = accounts.clone();
         for (address, account_info) in accounts.iter() {
