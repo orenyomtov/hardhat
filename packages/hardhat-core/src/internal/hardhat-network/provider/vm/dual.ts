@@ -482,7 +482,9 @@ function assertEqualAccounts(
 
   if (!ethereumJSAccount.storageRoot.equals(rethnetAccount.storageRoot)) {
     console.trace(
-      `Different storageRoot: ${ethereumJSAccount.storageRoot} !== ${rethnetAccount.storageRoot}`
+      `Different storageRoot: ${ethereumJSAccount.storageRoot.toString(
+        "hex"
+      )} !== ${rethnetAccount.storageRoot.toString("hex")}`
     );
     differences.push("storageRoot");
   }
