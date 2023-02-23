@@ -1,6 +1,6 @@
 {
   "name": "@nomiclabs/hardhat-etherscan",
-  "version": "3.1.6",
+  "version": "3.1.7",
   "description": "Hardhat plugin for verifying contracts on etherscan",
   "repository": "github:nomiclabs/hardhat",
   "homepage": "https://github.com/nomiclabs/hardhat/tree/main/packages/hardhat-etherscan",
@@ -63,7 +63,7 @@
     "eslint-plugin-no-only-tests": "3.0.0",
     "eslint-plugin-prettier": "3.4.0",
     "ethers": "^5.0.8",
-    "hardhat": "^2.0.4",
+    "hardhat": "^2.13.0",
     "mocha": "^10.0.0",
     "prettier": "2.4.1",
     "rimraf": "^3.0.2",

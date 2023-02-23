@@ -1,5 +1,12 @@
 # @nomiclabs/hardhat-vyper
 
+## 3.0.3
+
+### Patch Changes
+
+- a7e70047e: Keep the parent exception when throwing because the compiler list download failed.
+- 3aa2298c4: Document how to use the plugin in Github Actions
+
 ## 3.0.2
 
 ### Patch Changes
